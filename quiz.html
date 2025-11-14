@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fun Quiz</title>
+
+  <style>
+    :root { --bg:#fff0f7; --accent:#ff7aa2; --card:#fff7fc; }
+
+    body{
+      margin:0;font-family:Inter, Arial;
+      background:linear-gradient(180deg,var(--bg),#ffe6f3);
+      background-size:120% 120%;
+      min-height:100vh;
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;
+      transition:background-position .1s;
+    }
+
+    .card{
+      background:var(--card);padding:28px;width:min(850px,94vw);
+      border-radius:22px;text-align:center;
+      box-shadow:0 18px 40px rgba(255,122,162,.15);
+      animation:fadeIn .8s ease;
+    }
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1}}
+
+    h1{color:#6b4056;font-size:clamp(24px,4vw,36px);margin-bottom:20px;}
+    .question{font-size:22px;color:#6b4056c5;margin-bottom:26px;}
+
+    .btn{
+      background:var(--accent);padding:14px 22px;border:none;
+      border-radius:14px;font-size:18px;color:white;
+      cursor:pointer;font-weight:700;
+      margin:10px;box-shadow:0 8px 20px rgba(255,122,162,.26);
+      transition:.2s;
+    }
+    .btn:hover{transform:scale(1.05)}
+
+    .heart{
+      position:fixed;top:-5vh;pointer-events:none;
+      animation:fall 7s linear infinite;
+    }
+    @keyframes fall{
+      0%{transform:translateY(-10vh)}
+      100%{transform:translateY(110vh) rotate(360deg)}
+    }
+
+    @keyframes sparklePop{
+      0%{transform:scale(.1);opacity:0}
+      60%{transform:scale(1.4);opacity:1}
+      100%{transform:scale(1);opacity:0}
+    }
+  </style>
+
+</head>
+<body>
+
+  <div class="card">
+    <h1>Fun Quiz 💗</h1>
+    <div class="question">Who is the cutest?</div>
+    <button class="btn" id="correctBtn">Me 😘</button>
+  </div>
+
+  <!-- Music -->
+  <audio id="globalMusic" loop preload="auto"
+    src="music.mp3"></audio>
+
+<script>
+  const audio=document.getElementById('globalMusic');
+
+  function fadeMusic(vol=0.4, duration=900){
+    audio.volume=0;
+    audio.play().catch(()=>{});
+    let step=50, steps=duration/step, i=0;
+    let f=setInterval(()=>{
+      i++; audio.volume=Math.min(vol,(i/steps)*vol);
+      if(i>=steps) clearInterval(f);
+    },step);
+  }
+
+  if(sessionStorage.getItem('musicEnabled')==='yes') fadeMusic(0.4,900);
+
+  // Hearts
+  function createHeart(){
+    const h=document.createElement('div');
+    h.className='heart';
+    h.innerText=Math.random()>0.4?'💖':'💕';
+    h.style.left=Math.random()*100+'vw';
+    h.style.fontSize=(18+Math.random()*20)+'px';
+    h.style.animationDuration=(5+Math.random()*5)+'s';
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),11000);
+  }
+  for(let i=0;i<6;i++) setTimeout(createHeart,i*700);
+  setInterval(createHeart,3400);
+
+  // Correct answer
+  correctBtn.onclick=()=>{
+    const sp=document.createElement('div');
+    sp.innerText='✨';
+    sp.style.position='fixed';
+    sp.style.left='50%';
+    sp.style.top='50%';
+    sp.style.transform='translate(-50%, -50%)';
+    sp.style.fontSize='70px';
+    sp.style.animation='sparklePop 1s ease-out';
+    document.body.appendChild(sp);
+    setTimeout(()=>sp.remove(),1000);
+
+    setTimeout(()=>location.href='proposal.html',700);
+  }
+
+  // Keyboard nav
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight') location.href='proposal.html';
+    if(e.key==='ArrowLeft') location.href='reasons.html';
+  });
+
+  // Parallax
+  document.addEventListener('mousemove', e=>{
+    const x=(e.clientX/window.innerWidth - 0.5)*10;
+    const y=(e.clientY/window.innerHeight - 0.5)*10;
+    document.body.style.backgroundPosition=`${50+x}% ${50+y}%`;
+  });
+</script>
+
+</body>
+</html>

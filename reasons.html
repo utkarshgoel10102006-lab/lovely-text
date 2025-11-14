@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reasons I Like You</title>
+
+<style>
+  :root { --bg:#ffe6f1; --accent:#ff7aa2; --card:#fff0f7; }
+
+  body{
+    margin:0;font-family:Inter,Arial;
+    background:linear-gradient(180deg,var(--bg),#fff0f6);
+    background-size:120% 120%;
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    overflow:hidden;transition:background-position .1s;
+  }
+
+  .container{
+    background:var(--card);padding:30px;width:min(900px,94vw);
+    border-radius:20px;text-align:center;
+    box-shadow:0 18px 40px rgba(107,64,86,.1);
+    animation:fadeIn 1s ease;
+  }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1}}
+
+  h1{color:#6b4056;font-size:clamp(24px,4vw,36px);margin:10px 0 20px;}
+
+  .list-item{
+    font-size:20px;margin:12px 0;color:#6b4056cc;
+    opacity:0;transform:translateY(20px);animation:popUp .6s forwards;
+  }
+  @keyframes popUp{to{opacity:1;transform:none}}
+
+  .btn{
+    margin-top:25px;padding:12px 20px;background:var(--accent);color:white;
+    border:none;border-radius:12px;cursor:pointer;font-weight:700;
+    box-shadow:0 8px 20px rgba(255,122,162,.2);font-size:16px;
+  }
+
+  .heart{
+    position:fixed;top:-5vh;pointer-events:none;
+    animation:fall 7s linear infinite;
+  }
+  @keyframes fall{
+    0%{transform:translateY(-10vh)}
+    100%{transform:translateY(110vh) rotate(360deg)}
+  }
+</style>
+</head>
+
+<body style="margin:0;padding:0;overflow:hidden;">
+<iframe src="player.html" style="width:0;height:0;border:0;position:absolute;"></iframe>
+
+<div id="content" style="position:relative; z-index:1;">
+  <!-- your existing page content goes here -->
+</div>
+
+
+<div class="container">
+  <h1>Reasons I Like You ❤️</h1>
+
+  <div class="list-item" style="animation-delay:.2s">You make everything lighter ✨</div>
+  <div class="list-item" style="animation-delay:.4s">Your smile is the cutest 💕</div>
+  <div class="list-item" style="animation-delay:.6s">You brighten my world ❤️</div>
+  <div class="list-item" style="animation-delay:.8s">Talking to you feels like home 💗</div>
+  <div class="list-item" style="animation-delay:1s">You're genuinely special to me 💞</div>
+
+  <button class="btn" id="nextBtn">Next ➜</button>
+</div>
+
+<!-- Music -->
+<audio id="globalMusic" loop preload="auto"
+  src="music.mp3"></audio>
+
+<script>
+  const audio=document.getElementById('globalMusic');
+
+  function fadeMusic(vol=0.4, duration=900){
+    audio.volume=0;
+    audio.play().catch(()=>{});
+    let step=50, steps=duration/step, i=0;
+    let f=setInterval(()=>{
+      i++; audio.volume=Math.min(vol,(i/steps)*vol);
+      if(i>=steps) clearInterval(f);
+    },step);
+  }
+
+  if(sessionStorage.getItem('musicEnabled')==='yes') fadeMusic(0.4,900);
+
+  function createHeart(){
+    const h=document.createElement('div');
+    h.className='heart';
+    h.innerText=Math.random()>0.4?'💕':'💗';
+    h.style.left=Math.random()*100+'vw';
+    h.style.fontSize=(18+Math.random()*22)+'px';
+    h.style.animationDuration=(5+Math.random()*5)+'s';
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),12000);
+  }
+  for(let i=0;i<6;i++) setTimeout(createHeart,i*600);
+  setInterval(createHeart,3500);
+
+  nextBtn.onclick=()=>location.href='quiz.html';
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight') location.href='quiz.html';
+    if(e.key==='ArrowLeft') history.back();
+  });
+
+  // Parallax BG
+  document.addEventListener('mousemove',e=>{
+    const x=(e.clientX/window.innerWidth - 0.5)*10;
+    const y=(e.clientY/window.innerHeight - 0.5)*10;
+    document.body.style.backgroundPosition=`${50+x}% ${50+y}%`;
+  });
+</script>
+
+</body>
+</html>

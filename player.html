@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<body style="margin:0;overflow:hidden;background:transparent;">
+
+<audio id="bgm" autoplay loop>
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+// fade in
+let audio=document.getElementById("bgm");
+audio.volume=0;
+audio.play().catch(()=>{});
+let v=0;
+let x=setInterval(()=>{
+  v+=0.02;
+  audio.volume=v;
+  if(v>=0.4) clearInterval(x);
+},150);
+</script>
+
+</body>
+</html>
