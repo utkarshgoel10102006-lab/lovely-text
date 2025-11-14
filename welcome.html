@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Welcome - Made with Love</title>
+
   <style>
     :root{--bg:#ffd9e6;--accent:#ff7aa2;--card:#fff0f6}
     *{box-sizing:border-box}
@@ -20,11 +21,15 @@
     .container{
       width:min(900px,94vw);padding:28px;border-radius:18px;
       background:var(--card);box-shadow:0 18px 40px rgba(107,64,86,0.08);
-      text-align:center;position:relative;
+      text-align:center;position:relative;z-index:2;
     }
 
     .logo{font-size:46px;animation:dropIn .7s ease-out forwards;opacity:0;}
-    @keyframes dropIn{to{transform:none;opacity:1}}
+
+    @keyframes dropIn{
+      from{transform:translateY(-20px);opacity:0}
+      to{transform:none;opacity:1}
+    }
 
     h1{margin:6px 0 8px;font-size:clamp(22px,4vw,36px);color:#6b4056}
     p{margin:0 0 16px;color:#6b4056aa}
@@ -47,41 +52,71 @@
       100%{transform:translateY(110vh) rotate(360deg);opacity:0}
     }
 
+    /* Music popup */
+    #musicPopup{
+      position:fixed;inset:0;background:rgba(0,0,0,0.55);
+      backdrop-filter:blur(6px);display:flex;align-items:center;
+      justify-content:center;z-index:9999;
+    }
+    #musicPopup .box{
+      background:#fff0f7;padding:24px 30px;border-radius:18px;
+      text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.15);
+    }
   </style>
 </head>
 
-<body style="margin:0;padding:0;overflow:hidden;">
-<iframe src="player.html" style="width:0;height:0;border:0;position:absolute;"></iframe>
+<body>
 
-<div id="content" style="position:relative; z-index:1;">
-  <!-- your existing page content goes here -->
+<!-- Persistent music player -->
+<iframe id="playerFrame" src="player.html"
+ style="width:0;height:0;border:0;position:absolute;left:0;top:0;z-index:-1;"></iframe>
+
+<div class="container">
+  <div class="logo">💖 Made with Love</div>
+  <h1>Hi, beautiful</h1>
+  <p>Welcome — I made this little surprise just for you.</p>
+  <button class="btn" id="startBtn">Start 💕</button>
+  <div class="sub">Swipe ➜ or press → to go next.</div>
+</div>
+
+<!-- Tap-to-Enable Music Popup -->
+<div id="musicPopup">
+  <div class="box">
+    <h2 style="margin:0;color:#6b4056;font-size:22px;">🎵 Tap to Enable Music</h2>
+    <p style="color:#6b4056bb;font-size:15px;margin-top:8px;">
+      Tap below to start the soft lofi music.
+    </p>
+    <button id="enableMusicBtn"
+      style="margin-top:14px;padding:10px 18px;background:#ff7aa2;color:white;border:none;
+             border-radius:12px;font-weight:700;cursor:pointer;">
+      Enable Music 💗
+    </button>
+  </div>
 </div>
 
 
-
-  <div class="container">
-    <div class="logo">💖 Made with Love</div>
-    <h1>Hi, beautiful</h1>
-    <p>Welcome — I made this little surprise just for you.</p>
-    <button class="btn" id="startBtn">Start 💕</button>
-    <div class="sub">Swipe ➜ or press → to go next.</div>
-  </div>
-
-  <!-- Tap-to-Enable Music Popup -->
-  <div id="musicPopup" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:9999;">
-    <div style="background:#fff0f7;padding:24px 30px;border-radius:18px;text-align:center;">
-      <h2 style="margin:0;color:#6b4056;font-size:22px;">🎵 Tap to Enable Music</h2>
-      <p style="color:#6b4056bb;font-size:15px;margin-top:8px;">Tap below to start the soft lofi music.</p>
-      <button id="enableMusicBtn" style="margin-top:14px;padding:10px 18px;background:#ff7aa2;color:white;border:none;border-radius:12px;font-weight:700;cursor:pointer;">Enable Music 💗</button>
-    </div>
-  </div>
-
-  <!-- Global Music -->
-  <audio id="globalMusic" loop preload="auto"
-    src="music.mp3"></audio>
-
 <script>
-  // Hearts
+  // ========== MUSIC CONTROL (no restart across pages) ==========
+  const iframe = document.getElementById('playerFrame');
+  const enableBtn = document.getElementById('enableMusicBtn');
+  const popup = document.getElementById('musicPopup');
+
+  function startMusic(){
+    try { iframe.contentWindow.postMessage('start-music', '*'); } catch(e){}
+    sessionStorage.setItem('musicEnabled','yes');
+  }
+
+  enableBtn.onclick = () => {
+    startMusic();
+    popup.style.display='none';
+  };
+
+  if(sessionStorage.getItem('musicEnabled') === 'yes'){
+    popup.style.display='none';
+    startMusic();
+  }
+
+  // ========= Hearts ==========
   function createHeart(){
     const el=document.createElement('div');
     el.className='heart';
@@ -95,52 +130,22 @@
   for(let i=0;i<6;i++) setTimeout(createHeart,i*700);
   setInterval(createHeart,3000);
 
-  // Navigation
-  startBtn.onclick=()=>location.href='reasons.html';
-
+  // ========= Navigation ==========
+  document.getElementById('startBtn').onclick=()=>location.href='reasons.html';
   document.addEventListener('keydown',e=>{
     if(e.key==='ArrowRight') location.href='reasons.html';
   });
 
-  // Swipe
-  let startX=null;
-  document.addEventListener('touchstart',e=>startX=e.touches[0].clientX);
+  // ========= Swipe ==========
+  let sx=null;
+  document.addEventListener('touchstart',e=>sx=e.touches[0].clientX);
   document.addEventListener('touchend',e=>{
-    if(!startX) return;
-    if(startX - e.changedTouches[0].clientX > 50)
+    if(!sx) return;
+    if(sx - e.changedTouches[0].clientX > 50)
       location.href='reasons.html';
   });
 
-  // Music fade
-  const popup=document.getElementById('musicPopup');
-  const enableBtn=document.getElementById('enableMusicBtn');
-  const audio=document.getElementById('globalMusic');
-
-  function fadeMusic(vol=0.4, duration=900){
-    audio.volume=0;
-    audio.play().catch(()=>{});
-    let step=50;
-    let steps=duration/step;
-    let i=0;
-    let f=setInterval(()=>{
-      i++;
-      audio.volume=Math.min(vol,(i/steps)*vol);
-      if(i>=steps) clearInterval(f);
-    },step);
-  }
-
-  enableBtn.onclick=()=>{
-    fadeMusic(0.4,900);
-    popup.style.display='none';
-    sessionStorage.setItem('musicEnabled','yes');
-  };
-
-  if(sessionStorage.getItem('musicEnabled')==='yes'){
-    popup.style.display='none';
-    fadeMusic(0.4,900);
-  }
-
-  // Parallax BG
+  // ========= Parallax BG ==========
   document.addEventListener('mousemove', e=>{
     const x=(e.clientX/window.innerWidth - 0.5)*10;
     const y=(e.clientY/window.innerHeight - 0.5)*10;

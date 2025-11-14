@@ -1,23 +1,48 @@
 <!DOCTYPE html>
 <html>
-<body style="margin:0;overflow:hidden;background:transparent;">
-
-<audio id="bgm" autoplay loop>
-  <source src="music.mp3" type="audio/mpeg">
-</audio>
+<head>
+  <meta charset="utf-8" />
+  <title>Music Player</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>body{margin:0;background:transparent;}</style>
+</head>
+<body>
+  <audio id="bgm" loop preload="auto" src="music.mp3"></audio>
 
 <script>
-// fade in
-let audio=document.getElementById("bgm");
-audio.volume=0;
-audio.play().catch(()=>{});
-let v=0;
-let x=setInterval(()=>{
-  v+=0.02;
-  audio.volume=v;
-  if(v>=0.4) clearInterval(x);
-},150);
-</script>
+(function(){
+  const audio = document.getElementById('bgm');
 
+  // fade-in helper
+  function fadeIn(targetVolume = 0.35, duration = 900){
+    audio.volume = 0;
+    audio.play().catch(()=>{});
+    const stepMs = 50;
+    const steps = Math.max(1, Math.floor(duration / stepMs));
+    let i = 0;
+    const t = setInterval(()=>{
+      i++;
+      audio.volume = Math.min(targetVolume, (i/steps) * targetVolume);
+      if(i >= steps) clearInterval(t);
+    }, stepMs);
+  }
+
+  // If parent requests start, play
+  window.addEventListener('message', (ev) => {
+    if(!ev.data) return;
+    if(ev.data === 'start-music'){
+      fadeIn(0.35, 900);
+    }
+  }, false);
+
+  // Attempt an autoplay fallback (some browsers allow)
+  // If audio can play automatically, start quietly (won't hurt)
+  audio.play().then(()=> {
+    audio.volume = 0.35;
+  }).catch(()=> {
+    // blocked, wait for message from parent
+  });
+})();
+</script>
 </body>
 </html>

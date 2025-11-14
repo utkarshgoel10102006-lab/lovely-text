@@ -23,6 +23,7 @@
     text-align:center;width:min(900px,94vw);
     box-shadow:0 20px 45px rgba(255,122,162,.18);
     animation:fade 1.2s ease;
+    position:relative;z-index:2;
   }
 
   @keyframes fade{
@@ -74,6 +75,7 @@
     opacity:0;
     animation:heartPop 1.8s ease-out forwards;
     animation-delay:1.4s;
+    pointer-events:none;
   }
 
   @keyframes heartPop{
@@ -86,6 +88,10 @@
 </head>
 <body>
 
+<!-- persistent music player -->
+<iframe id="playerFrame" src="player.html"
+style="width:0;height:0;border:0;position:absolute;left:0;top:0;z-index:-1;"></iframe>
+
   <div class="card">
     <h1>You Said Yes ❤️</h1>
 
@@ -97,25 +103,16 @@
 
   <div class="bigHeart">💖</div>
 
-  <!-- Music -->
-  <audio id="globalMusic" loop preload="auto"
-    src="music.mp3"></audio>
-
 <script>
-  const audio=document.getElementById('globalMusic');
+(function(){
 
-  function fadeMusic(vol=0.4, duration=900){
-    audio.volume=0;
-    audio.play().catch(()=>{});
-    let step=50, steps=duration/step, i=0;
-    let f=setInterval(()=>{
-      i++; audio.volume=Math.min(vol,(i/steps)*vol);
-      if(i>=steps) clearInterval(f);
-    },step);
+  // ========= Continuous Music ==========
+  const iframe = document.getElementById('playerFrame');
+  if(sessionStorage.getItem('musicEnabled') === 'yes'){
+    try{ iframe.contentWindow.postMessage('start-music','*'); }catch(e){}
   }
 
-  if(sessionStorage.getItem('musicEnabled')==='yes') fadeMusic(0.4,900);
-
+  // ========= Confetti ==========
   function dropConfetti(){
     const c=document.createElement('div');
     c.className='confetti';
@@ -129,17 +126,19 @@
   for(let i=0;i<25;i++) setTimeout(dropConfetti,i*120);
   setInterval(dropConfetti,800);
 
-  // Keyboard nav
+  // ========= Keyboard Navigation ==========
   document.addEventListener('keydown',e=>{
     if(e.key==='ArrowLeft') location.href='proposal.html';
   });
 
-  // Parallax
+  // ========= Parallax ==========
   document.addEventListener('mousemove', e=>{
     const x=(e.clientX/window.innerWidth - 0.5)*10;
     const y=(e.clientY/window.innerHeight - 0.5)*10;
     document.body.style.backgroundPosition=`${50+x}% ${50+y}%`;
   });
+
+})();
 </script>
 
 </body>

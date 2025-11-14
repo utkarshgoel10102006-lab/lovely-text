@@ -21,7 +21,9 @@
     border-radius:20px;text-align:center;
     box-shadow:0 18px 40px rgba(107,64,86,.1);
     animation:fadeIn 1s ease;
+    position:relative;z-index:2;
   }
+
   @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1}}
 
   h1{color:#6b4056;font-size:clamp(24px,4vw,36px);margin:10px 0 20px;}
@@ -49,13 +51,11 @@
 </style>
 </head>
 
-<body style="margin:0;padding:0;overflow:hidden;">
-<iframe src="player.html" style="width:0;height:0;border:0;position:absolute;"></iframe>
+<body>
 
-<div id="content" style="position:relative; z-index:1;">
-  <!-- your existing page content goes here -->
-</div>
-
+<!-- Persistent continuous music player -->
+<iframe id="playerFrame" src="player.html"
+ style="width:0;height:0;border:0;position:absolute;left:0;top:0;z-index:-1;"></iframe>
 
 <div class="container">
   <h1>Reasons I Like You ❤️</h1>
@@ -69,25 +69,16 @@
   <button class="btn" id="nextBtn">Next ➜</button>
 </div>
 
-<!-- Music -->
-<audio id="globalMusic" loop preload="auto"
-  src="music.mp3"></audio>
-
 <script>
-  const audio=document.getElementById('globalMusic');
+(function(){
 
-  function fadeMusic(vol=0.4, duration=900){
-    audio.volume=0;
-    audio.play().catch(()=>{});
-    let step=50, steps=duration/step, i=0;
-    let f=setInterval(()=>{
-      i++; audio.volume=Math.min(vol,(i/steps)*vol);
-      if(i>=steps) clearInterval(f);
-    },step);
+  // ========== START CONTINUOUS MUSIC ==========
+  const iframe = document.getElementById('playerFrame');
+  if(sessionStorage.getItem('musicEnabled') === 'yes'){
+    try { iframe.contentWindow.postMessage('start-music', '*'); } catch(e){}
   }
 
-  if(sessionStorage.getItem('musicEnabled')==='yes') fadeMusic(0.4,900);
-
+  // ========== Hearts ==========
   function createHeart(){
     const h=document.createElement('div');
     h.className='heart';
@@ -101,19 +92,22 @@
   for(let i=0;i<6;i++) setTimeout(createHeart,i*600);
   setInterval(createHeart,3500);
 
-  nextBtn.onclick=()=>location.href='quiz.html';
+  // ========== Navigation ==========
+  document.getElementById('nextBtn').onclick=()=>location.href='quiz.html';
 
   document.addEventListener('keydown',e=>{
     if(e.key==='ArrowRight') location.href='quiz.html';
-    if(e.key==='ArrowLeft') history.back();
+    if(e.key==='ArrowLeft') location.href='welcome.html';
   });
 
-  // Parallax BG
+  // ========== Parallax BG ==========
   document.addEventListener('mousemove',e=>{
     const x=(e.clientX/window.innerWidth - 0.5)*10;
     const y=(e.clientY/window.innerHeight - 0.5)*10;
     document.body.style.backgroundPosition=`${50+x}% ${50+y}%`;
   });
+
+})();
 </script>
 
 </body>

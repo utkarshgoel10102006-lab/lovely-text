@@ -22,6 +22,7 @@
       border-radius:22px;text-align:center;
       box-shadow:0 18px 40px rgba(255,122,162,.18);
       animation:fadeIn .8s ease;
+      position:relative;z-index:2;
     }
 
     @keyframes fadeIn{
@@ -74,10 +75,13 @@
       60%{transform:scale(1.5);opacity:1}
       100%{transform:scale(.8);opacity:0}
     }
-
   </style>
 </head>
 <body>
+
+<!-- Persistent music player (never reloads) -->
+<iframe id="playerFrame" src="player.html"
+ style="width:0;height:0;border:0;position:absolute;left:0;top:0;z-index:-1;"></iframe>
 
   <div class="card">
     <h1>Will you be mine? 💍💕</h1>
@@ -86,26 +90,16 @@
     <button class="btn" id="noBtn">No 😆</button>
   </div>
 
-  <!-- Continuous Music -->
-  <audio id="globalMusic" loop preload="auto"
-    src="music.mp3"></audio>
-
 <script>
-  const audio=document.getElementById('globalMusic');
+(function(){
 
-  function fadeMusic(vol=0.4, duration=900){
-    audio.volume=0;
-    audio.play().catch(()=>{});
-    let step=50, steps=duration/step, i=0;
-    let f=setInterval(()=>{
-      i++; audio.volume=Math.min(vol,(i/steps)*vol);
-      if(i>=steps) clearInterval(f);
-    },step);
+  // ======== Continuous Music =========
+  const iframe = document.getElementById('playerFrame');
+  if(sessionStorage.getItem('musicEnabled')==='yes'){
+    try { iframe.contentWindow.postMessage('start-music','*'); } catch(e){}
   }
 
-  if(sessionStorage.getItem('musicEnabled')==='yes') fadeMusic(0.4,900);
-
-  // Hearts
+  // ======== Hearts =========
   function createHeart(){
     const h=document.createElement('div');
     h.className='heart';
@@ -116,11 +110,10 @@
     document.body.appendChild(h);
     setTimeout(()=>h.remove(),9000);
   }
-
   for(let i=0;i<5;i++) setTimeout(createHeart,i*600);
   setInterval(createHeart,2800);
 
-  // YES action → fireworks + go to final page
+  // ======== YES → Fireworks then go final page =========
   yesBtn.onclick=()=>{
     for(let i=0;i<20;i++){
       setTimeout(()=>{
@@ -131,6 +124,7 @@
         fw.style.top=(50+(Math.random()*40-20))+'vh';
         fw.style.fontSize=(40+Math.random()*40)+'px';
         fw.style.animation='explode 1s ease-out';
+        fw.style.pointerEvents='none';
         document.body.appendChild(fw);
         setTimeout(()=>fw.remove(),1000);
       },i*80);
@@ -138,25 +132,26 @@
     setTimeout(()=>location.href='final.html',1100);
   }
 
-  // NO button moves away
+  // ======== NO button runs away =========
   noBtn.onmouseover=()=>{
-    noBtn.style.left=(Math.random()*200-80)+'px';
-    noBtn.style.top=(Math.random()*180-80)+'px';
+    noBtn.style.left=(Math.random()*200-100)+'px';
+    noBtn.style.top=(Math.random()*200-100)+'px';
   }
-
   noBtn.onclick=()=>alert('You can’t press No 😆💖');
 
-  // Keyboard
+  // ======== Key Navigation =========
   document.addEventListener('keydown',e=>{
     if(e.key==='ArrowLeft') location.href='quiz.html';
   });
 
-  // Parallax BG
+  // ======== Parallax BG =========
   document.addEventListener('mousemove', e=>{
     const x=(e.clientX/window.innerWidth - 0.5)*10;
     const y=(e.clientY/window.innerHeight - 0.5)*10;
     document.body.style.backgroundPosition=`${50+x}% ${50+y}%`;
   });
+
+})();
 </script>
 
 </body>
